@@ -1,0 +1,55 @@
+#!/bin/bash
+
+host="ldap3.opw.ie"
+base="o=opw"
+defaultFilter="(cn=*)"
+defaultDest="/opt/opw/updateAvatar/cache"
+res="64x64"
+
+
+getlist() {
+	ldapsearch -LLL -h "$host" -b "$base" -s sub -x "$1" workforceID cn photo | perl -p0e 's/\n //g' | grep -v "dn:" | sed "s|^photo:* ||" | perl -p0e 's/\n.*: /\t/g' 
+	return $?
+}
+
+usage() {
+        echo -e "Usage: $0 [-h|--help] [userfilter] [destination]"
+        echo -e "  -h, --help\tDisplay this message."
+        echo -e "  [userfilter]\tThe LDAP filter used to select users to download photos.\n\t\t\tdefaults to $defaultFilter"
+        echo -e "  [destination]\tThe location to download photos.\n\t\t\tdefaults to $defaultDest"
+        exit ${1:-0}
+}
+
+filter="${1:-$defaultFilter}"
+dest="${2:-$defaultDest}"
+case "$filter" in
+    -h | --help )	usage 0 ;;
+    *)
+	if [[ ! "$filter" =~ .*=.* ]]; then
+		filter="(cn=$filter)"
+	fi
+	if [[ ! "$filter" =~ \(.*\) ]]; then
+		filter="($filter)"
+	fi
+	filter="(&(objectClass=person)(photo=*)(workforceID=*)$filter)"
+        ;;
+esac
+
+IFS_OLD="$IFS"
+IFS=$'\n'
+for line in $( getlist "$filter" )
+do
+	url=$( echo $line | cut -f 1 )
+	cn=$( echo $line | cut -f 2 )
+	uid=$( echo $line | cut -f 3 )
+	oldfile="$dest/$cn-$uid-orig.jpeg"
+	newfile="$dest/$cn-$uid-$res.jpeg"
+	if wget -q --output-document="$oldfile" "$url"
+	then
+		echo "Photo for User ($cn) downloaded successfully."
+		convert -size $res "$oldfile" -resize $res +profile '*' "$newfile" && echo "Avatar photo for User ($cn) successfully created."
+	fi
+done
+IFS="$IFS_OLD"
+exit 0
+

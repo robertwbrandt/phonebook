@@ -1,0 +1,72 @@
+#!/bin/bash
+
+AuthDN="cn=updatePhonebook,ou=web,o=opw"
+AuthPW="UpdatePh0neB00k"
+host="ldap3.opw.ie"
+base="o=opw"
+
+defaultDest="/opt/opw/updateAvatar/cache"
+res="64x64"
+
+getAttr() {
+	result=$( ldapsearch -LLL -h "$host" -b "$base" -s sub -x "$1" $2 | perl -p0e 's/\n //g' | sed -n "s|^$2:* ||p" )
+	test -n "$result" && echo "$result"
+	return $?
+}
+
+updatePhoto() {
+	cn="$1"
+	uid="$2"
+	file="$3"
+	filter="(&(cn=$cn)(workforceID=$uid))"
+	if ! dn=$( getAttr "$filter" "entryDN" ) 
+	then
+		logger -st "updateAvatar" "The User ($cn) does not exist."
+		return 3
+	fi
+	if ! ldapPhoto=$( getAttr "$filter" "jpegPhoto" ) 
+	then
+		logger -st "updateAvatar" "The User ($cn) does not have a photo."
+		return 2
+	fi
+	filePhoto=$( base64 -w0 "$file" ) && [ "$ldapPhoto" == "$filePhoto" ] && return 0
+
+	ldif=""
+	ldif="$ldif\ndn: $dn"
+	ldif="$ldif\nchangetype: modify"
+	ldif="$ldif\nreplace: jpegPhoto"
+	ldif="$ldif\njpegPhoto:: $filePhoto"
+
+	if echo -e "$ldif" | sed "s|\(.\{77\}\)|\1\n |g" | ldapmodify -h "$host" -x -D "$AuthDN" -w "$AuthPW" > /dev/null 2>&1
+	then
+		logger -t "updateAvatar" "The User ($cn) avatar was updated successfully."
+	fi
+	return $?
+}
+
+usage() {
+        echo -e "Usage: $0 [-h|--help] [userfilter]"
+        echo -e "  -h, --help\tDisplay this message."
+        echo -e "  [userfilter]\tThe CN wildcard filter to select users to update."
+        exit ${1:-0}
+}
+
+case "$1" in
+    -h | --help )	usage 0 ;;
+    *)
+	IFS_OLD="$IFS"
+	IFS=$'\n'
+	for file in $( find "$defaultDest" -print | grep "$res.jpeg" | grep "$1" )
+	do
+		filename=${file##*/}
+		cn=$( echo "$filename" | cut -d "-" -f 1 )
+		uid=$( echo "$filename" | cut -d "-" -f 2 )
+		filter="(&(cn=$cn)(workforceID=$uid))"
+		updatePhoto "$cn" "$uid" "$file"
+	done
+	IFS="$IFS_OLD"
+        ;;
+esac
+
+exit 0
+

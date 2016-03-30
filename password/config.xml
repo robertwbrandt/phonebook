@@ -1,0 +1,103 @@
+<?xml version="1.0" standalone="yes"?>
+<ExpirationNotificationConfig>
+<Directory>
+<Tree>OPW</Tree>
+<Server>10.200.200.2</Server>
+<SecureLDAP>no</SecureLDAP>
+<DebugInfo>no</DebugInfo>
+<DisplayGUI>no</DisplayGUI>
+<SendTest>no</SendTest>
+<SendMsg>yes</SendMsg>
+<Login>cn=ldapsearch,ou=web,o=opw</Login>
+<Password>D0n't__P@n!c?</Password>
+<BaseContext>o=opw</BaseContext>
+</Directory>
+
+<Notification>
+<FromEmailAddress>passwordnotification@opw.ie</FromEmailAddress>
+<FromText>Password Notification Service</FromText>
+<Subject>Network Password Expiration Warning</Subject>
+<MailHost>smtp.opw.ie</MailHost>
+<EventAddress>bob.brandt@opw.ie</EventAddress>
+<EventTo>Password Notification Service</EventTo>
+<PasswordURL>http://changepassword/</PasswordURL>
+
+<!-- The following variables may be embedded in the email message content: -->
+<!--    %days%   number of days until current user's password expires      -->
+<!--    %grace%  number of grace logins remaining for current user         -->
+<!--    %pwurl%  URL for password self-service page, defined above         -->
+
+
+
+<Notify days="5">
+<Message>
+<!-- START EMAIL MESSAGE CONTENT HERE -->
+<html><head><title>Password Expiration Notice</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"></head>
+<body bgcolor="#FFFFFF" text="#000000">
+<div align="center" width="100">
+<img src="http://intranet.opw.ie/media/opw.jpg" height="150" alt="OPW"/>
+<br/>Network Password Expiration Notification<hr/>
+<br/><h3>Your network password will expire in %days% days.</h3><br/>
+<br/>Please change your network password at your earliest opportunity to<br/>prevent interruption of business services.
+<br/><br/>To change your password go <big><big><a href="%pwurl%">here</a></big></big>.
+<hr/></div></body></html>
+<!-- END EMAIL MESSAGE CONTENT HERE -->
+</Message>
+</Notify>
+
+
+<Notify days="3">
+<Message>
+<!-- START EMAIL MESSAGE CONTENT HERE -->
+<html><head><title>Password Expiration Notice</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"></head>
+<body bgcolor="#FFFFFF" text="#000000">
+<div align="center" width="100">
+<img src="http://intranet.opw.ie/media/opw.jpg" height="150" alt="OPW"/>
+<br/>Network Password Expiration Notification<hr/>
+<br/><h3>Your network password will expire in %days% days.</h3><br/>
+<br/>Please change your network password at your earliest opportunity to<br/>prevent interruption of business services.
+<br/><br/>To change your password go <big><big><a href="%pwurl%">here</a></big></big>.
+<hr/></div></body></html>
+<!-- END EMAIL MESSAGE CONTENT HERE -->
+</Message>
+</Notify>
+
+
+<Notify days="1">
+<Message>
+<!-- START EMAIL MESSAGE CONTENT HERE -->
+<html><head><title>Password Expiration Notice</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"></head>
+<body bgcolor="#FFFFFF" text="#000000">
+<div align="center" width="100">
+<img src="http://intranet.opw.ie/media/opw.jpg" height="150" alt="OPW"/>
+<br/>Network Password Expiration Notification<hr/>
+<br/><h3>Your network password will expire tomorrow.</h3><br/>
+<br/>Please change your network password as soon as possible to prevent<br/>interruption of business services.
+<br/><br/>To change your password go <big><big><a href="%pwurl%">here</a></big></big>.
+<hr/></div></body></html>
+<!-- END EMAIL MESSAGE CONTENT HERE -->
+</Message>
+</Notify>
+
+
+<Notify days="0">
+<Message>
+<!-- START EMAIL MESSAGE CONTENT HERE -->
+<html><head><title>Password Expiration Notice</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"></head>
+<body bgcolor="#FFFFFF" text="#000000">
+<div align="center" width="100">
+<img src="http://intranet.opw.ie/media/opw.jpg" height="150" alt="OPW"/>
+<br/>Network Password Expiration Notification<hr/>
+<br/><h3>Your network password has expired.<br>You have %grace% grace logins remaining.</h3><br/>
+<br/>Please change your network password immediately to prevent<br/>interruption of business services.
+<br/><br/>To change your password go <big><big><a href="%pwurl%">here</a></big></big>.
+<hr/></div></body></html>
+<!-- END EMAIL MESSAGE CONTENT HERE -->
+</Message>
+</Notify>
+</Notification>
+</ExpirationNotificationConfig>
