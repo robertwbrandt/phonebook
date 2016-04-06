@@ -98,21 +98,31 @@ def setup():
 
 [mail]
 Name = Email Address
+Check = lower
 
 [photo]
-Name = Email Address
+Name = Photo
+Check = None
 
 [title]
 Name = Grade
+Check = match
+Match = .8,ldap://ldap.opw.ie/
 
 [l]
 Name = Location
+Check = match
+Match = .8,ldap://ldap.opw.ie/
 
 [ou]
 Name = Section
+Check = match
+Match = .8,ldap://ldap.opw.ie/
 
 [telephoneNumber]
 Name = Telephone Number
+Check = 
+
 
 [facsimileTelephoneNumber]
 Name = FAX Number
